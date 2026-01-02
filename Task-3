@@ -1,0 +1,53 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.datasets import load_iris # Added for temporary data loading
+
+# The original line df = pd.read_excel("Iris.xlsx") caused a FileNotFoundError.
+# This means the 'Iris.xlsx' file was not found in the Colab environment.
+# To proceed, you need to ensure the file is accessible. Here are a few options:
+
+# Option 1: Upload the file directly to Colab during runtime
+# (Uncomment the following lines if you want to upload the file when you run this cell)
+# from google.colab import files
+# print("Please upload 'Iris.xlsx':")
+# uploaded = files.upload()
+# if 'Iris.xlsx' in uploaded:
+#     file_name = 'Iris.xlsx'
+# else:
+#     file_name = list(uploaded.keys())[0] # Fallback if user uploads a differently named file
+# df = pd.read_excel(file_name)
+
+# Option 2: Mount Google Drive if your file is there
+# (Uncomment the following lines and adjust the path accordingly)
+# from google.colab import drive
+# drive.mount('/content/drive')
+# df = pd.read_excel('/content/drive/MyDrive/path/to/Iris.xlsx') # **IMPORTANT: Update this path!**
+
+# Option 3: If 'Iris.xlsx' is already in your Colab session's root directory,
+# you can simply uncomment the line below:
+# df = pd.read_excel("Iris.xlsx")
+
+# --- TEMPORARY FIX: Using scikit-learn's built-in Iris dataset for demonstration ---
+# This allows the rest of the code to run without a FileNotFoundError.
+# You can replace this section with one of the options above once your file is accessible.
+iris = load_iris(as_frame=True)
+df = iris.frame # Convert to pandas DataFrame
+df.rename(columns={'target': 'Species'}, inplace=True) # Rename 'target' to 'Species'
+# Map numerical species to names for consistency with original expected data
+df['Species'] = df['Species'].map({0: 'setosa', 1: 'versicolor', 2: 'virginica'})
+# --- END TEMPORARY FIX ---
+
+print(df.head())
+X = df.drop(columns=["Species"])
+y = df["Species"]
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
